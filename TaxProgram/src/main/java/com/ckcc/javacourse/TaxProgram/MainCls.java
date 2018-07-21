@@ -8,9 +8,15 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class MainCls extends JFrame implements ActionListener {
 
@@ -66,10 +72,10 @@ public class MainCls extends JFrame implements ActionListener {
 	DefaultTableModel tbModelTaxReport;
 	
 	// Declare Employee Array List
-	ArrayList<Employee> listEmployee;
+	//ArrayList<Employee> listEmployee;
 	
 	public MainCls() {
-		listEmployee = new ArrayList<Employee>();
+		//listEmployee = new ArrayList<Employee>();
 		//Create Object MenuItem of File
 		mItemNew = new JMenuItem("New");
 		mItemSave = new JMenuItem("Save");
@@ -300,13 +306,34 @@ public class MainCls extends JFrame implements ActionListener {
 		tbModel.addColumn("Benefit($)");
 		tbModel.addColumn("Spouse?");
 		tbModel.addColumn("Minor Children");
+		tbEmp = new JTable(tbModel);
 		/*String data[] = 
 				{"105", "Inhae", "Park", "Male",
 					"inhae.park@gmail.com", "10/02/1992",
 					"Development Dept", "Software Engineer",
 					"2900", "80", "N", "0"};*/
-		tbEmp = new JTable(tbModel);
-		//tbModel.addRow(data);
+		// create session factory
+		SessionFactory factory = new Configuration()
+				.configure("hibernate.cfg.xml")
+				.addAnnotatedClass(Employee.class)
+				.buildSessionFactory();
+		// create session
+		Session session = factory.getCurrentSession();
+		try {
+			// start a transaction
+			session.beginTransaction();
+			String data[];
+			// query students
+			List<Employee> employeeList = session.createQuery("from Employee").getResultList();
+			for(Employee emp: employeeList) {
+				data = emp.toStringData();
+				tbModel.addRow(data);
+			}
+			// commit transaction
+			session.getTransaction().commit();
+		}finally {
+			factory.close();
+		}
 		
 		//Create Block Employee List - FINAL
 		JPanel blockEmpList_FINAL = new JPanel(new BorderLayout(10,10));
@@ -336,6 +363,7 @@ public class MainCls extends JFrame implements ActionListener {
 		JPanel conditionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		conditionPanel.add(new JLabel("Exchange Rate (1USD) : ", SwingConstants.CENTER));
 		conditionPanel.add(reportExchangeRate = new JTextField(20));
+		reportExchangeRate.addActionListener(this);
 		//======================================================
 		allConditionPanel.add(conditionPanel);
 		allConditionPanel.add(new JLabel("# Employee : 0", SwingConstants.RIGHT));
@@ -582,8 +610,65 @@ public class MainCls extends JFrame implements ActionListener {
 					);
 			// Step 2: add data into jTable for (employee list)
 			tbModel.addRow(empObj.toStringData());
+			// Add to database using hibernate
+			// Create Factory of Session
+			SessionFactory factory = new Configuration()
+									.configure("hibernate.cfg.xml")
+									.addAnnotatedClass(Employee.class)
+									.buildSessionFactory();
+			// Get session object from factory
+			Session sessionObj = factory.getCurrentSession();
+			try {
+				// start transaction
+				sessionObj.beginTransaction();
+				// save the student
+				sessionObj.save(empObj);
+				// commit the transaction
+				sessionObj.getTransaction().commit();
+			}finally {
+				factory.close();
+			}
 			// Step 3: add object into ArrayList for reporting
-			listEmployee.add(empObj);
+			//listEmployee.add(empObj);
+		}
+		if(e.getSource() == reportExchangeRate) {
+			// create session factory
+	 		SessionFactory factory = new Configuration()
+	 				.configure("hibernate.cfg.xml")
+	 				.addAnnotatedClass(Employee.class)
+	 				.addAnnotatedClass(Student.class)
+	 				.buildSessionFactory();
+	 		// create session
+	 		Session session = factory.getCurrentSession();
+	 		try {
+	 			// start a transaction
+	 			session.beginTransaction();
+	 			String data[];
+	 			// query students
+	 			List<Employee> employeeList = session.createQuery("from Employee").getResultList();
+	 			for(Employee emp: employeeList) {
+	 				data = emp.toStringData();
+	 				ArrayList<String> temp = new ArrayList<String>(Arrays.asList(data));
+	 				double exchangeRate = Double.parseDouble(reportExchangeRate.getText());
+	 				double taxRiel = emp.calculateTax(exchangeRate);
+	 				double taxUSD = taxRiel / exchangeRate;
+	 				
+	 				double netSalaryRiel = ((emp.getSalary() + emp.getBenefit()) * exchangeRate) - taxRiel;
+	 				double netSalaryUSD = netSalaryRiel / exchangeRate;
+	 				
+	 				temp.add("Riel " + String.format("%.2f", taxRiel));
+	 				temp.add("USD " + String.format("%.2f", taxUSD));
+	 				temp.add("Riel " + String.format("%.2f", netSalaryRiel));
+	 				temp.add("USD " + String.format("%.2f", netSalaryUSD));
+	 				
+	 				Object[] row = temp.toArray();
+	 				tbModelTaxReport.addRow(row);
+	 			}
+	 			// commit transaction
+	 			session.getTransaction().commit();
+	 		}finally {
+	 			factory.close();
+	 		}
 		}
 		if(e.getSource() == btnCalculate) {
 			String empID = "001";

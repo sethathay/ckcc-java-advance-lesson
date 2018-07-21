@@ -1,22 +1,56 @@
 package com.ckcc.javacourse.TaxProgram;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "tb_employee")
 public class Employee {
 	
 	// Data Memember of Employee Info
+	@Id
+	@Column(name = "id")
 	private String empID;
+	
+	@Column(name = "first_name")
 	private String firstName;
+	
+	@Column(name = "last_name")
 	private String lastName;
+	
+	@Column(name = "gender")
 	private boolean gender;
+	
+	@Column(name = "email")
 	private String email;
+	
+	@Column(name = "dob")
 	private String dob;
 	// Data Member of Company Info
+	@Column(name = "department")
 	private String department;
+	
+	@Column(name = "position")
 	private String position;
+	
+	@Column(name = "salary")
 	private double salary;
+	
+	@Column(name = "benefit")
 	private double benefit;
 	// Data Member of Family Info
+	
+	@Column(name = "has_spouse")
 	private boolean hasSpouse;
+	
+	@Column(name = "minor_children")
 	private int minorChild;
+	
+	public Employee() {
+		
+	}
 	
 	public Employee(String empID, String firstName, String lastName, boolean gender, String email, String dob,
 			String department, String position, double salary, double benefit, boolean hasSpouse, int minorChild) {
@@ -34,6 +68,102 @@ public class Employee {
 		this.minorChild = minorChild;
 	}
 	
+	public String getEmpID() {
+		return empID;
+	}
+
+	public void setEmpID(String empID) {
+		this.empID = empID;
+	}
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public boolean isGender() {
+		return gender;
+	}
+
+	public void setGender(boolean gender) {
+		this.gender = gender;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getDob() {
+		return dob;
+	}
+
+	public void setDob(String dob) {
+		this.dob = dob;
+	}
+
+	public String getDepartment() {
+		return department;
+	}
+
+	public void setDepartment(String department) {
+		this.department = department;
+	}
+
+	public String getPosition() {
+		return position;
+	}
+
+	public void setPosition(String position) {
+		this.position = position;
+	}
+
+	public double getSalary() {
+		return salary;
+	}
+
+	public void setSalary(double salary) {
+		this.salary = salary;
+	}
+
+	public double getBenefit() {
+		return benefit;
+	}
+
+	public void setBenefit(double benefit) {
+		this.benefit = benefit;
+	}
+
+	public boolean isHasSpouse() {
+		return hasSpouse;
+	}
+
+	public void setHasSpouse(boolean hasSpouse) {
+		this.hasSpouse = hasSpouse;
+	}
+
+	public int getMinorChild() {
+		return minorChild;
+	}
+
+	public void setMinorChild(int minorChild) {
+		this.minorChild = minorChild;
+	}
+
 	public String[] toStringData() {
 		String genderStr = gender? "Male" : "Female";
 		String hasSpouseStr = hasSpouse? "Yes" : "No";
